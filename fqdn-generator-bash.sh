@@ -109,7 +109,18 @@ while read k; do
     zoneFile=`awk '{print $2}' <<< "$k"`
     zoneFile="${zoneFile##*\/}"
     zoneFile="${zoneFile/\"\;/}"
-    zoneContent=`cat $zoneDir'/'$zoneFile`
+
+    processZone $zoneFile
+
+  fi
+
+done <<< "$compiledZoneFile"
+}
+
+
+processZone () {
+
+zoneContent=`cat $zoneDir'/'$1`
 
       while read z; do
 
@@ -124,7 +135,12 @@ while read k; do
 
 	  if [[ $z == '$INCLUDE'* ]]
 	    then
-	    echo '$INCLUDE'" found! Using zone directory: ""$zoneDir"
+	    #echo '$INCLUDE'" found! Using zone directory: ""$zoneDir"
+	    zoneFile=`awk '{print $2}' <<< "$z"`
+	    currentZone=`awk '{print $3}' <<< "$z"`
+	    currentZone=${currentZone/%?/}
+	    #echo ${currentZone/%?/}
+	    processZone $zoneFile
 	  fi
 
 	  currentRecord=`awk '{print $1}' <<< "$z"`
@@ -133,24 +149,25 @@ while read k; do
 	  case $currentRecord in
 
             '$ORIGIN')
-              currentZone="${z/\$ORIGIN /}";;
+              currentZone="${z/\$ORIGIN /}"
+	      currentZone=${currentZone/%?/};;
 
 	    *'.') 
 	      lastFQDN=`echo ${currentRecord/%?/}`
-	      echo ${currentRecord/%?/};;
+	      printf "${currentRecord/%?/}\n";;
 
-            '$TTL'|[0-9][0-9][0-9]*|'"'*)
+            '$TTL'|'$GENERATE'*|[0-9][0-9][0-9]*|'"'*|'4W')
               echo "EXCLUDING: ""$currentRecord" > /dev/null;;
 
             '@')
 	      lastFQDN="$currentZone"
-	      echo "$currentZone";;
+	      printf "$currentZone\n";;
 
             'TXT'|'SPF'|'A'|'CNAME'|'MX'|'NS')
-	      printf "$lastFQDN""\tRecord Type: ""$recordType\n";;
+	      printf "$lastFQDN","$recordType\n";;
 
 	    '' )
-	      echo "THIS IS A BLANK RECORD, using ""$lastFQDN";;
+	      echo "THIS IS A BLANK RECORD, using ""$lastFQDN" > /dev/null;;
 
 #	    [^a-zA-Z0-9-]*)
 #	      lastRecord=$currentRecord;;
@@ -158,16 +175,14 @@ while read k; do
 	    
 	    *)
 	      lastFQDN="$currentRecord"'.'"$currentZone"
-	      echo "$currentRecord"'.'"$currentZone";;
+	      printf "$currentRecord"'.'"$currentZone\n";;
 	  esac
 	      
 	fi
       done <<< "$zoneContent"
     unset currentZone
-  fi
-
-done <<< "$compiledZoneFile"
 }
+
 
 echo '' > /tmp/fqdn-generator.tmp
 createNamed
