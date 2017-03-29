@@ -51,10 +51,11 @@ if [[ $i == *'#'* ]]
 elif [[ $i == *'//'* ]]
   then
   # Removing everything after the last //
-  i=`echo ${i%#\/\/}`
+  i=`echo ${i%//*}`
 
   # Removing all //
   i="${i/\/\//}"
+
 # This will also remove trailing comments
 fi
 
