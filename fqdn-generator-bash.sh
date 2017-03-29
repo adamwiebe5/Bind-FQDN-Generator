@@ -48,6 +48,14 @@ if [[ $i == *'#'* ]]
   # Removing all #
   i="${i/\#/}"
 # This will also remove trailing comments
+elif [[ $i == *'//'* ]]
+  then
+  # Removing everything after the last //
+  i=`echo ${i%#\/\/}`
+
+  # Removing all //
+  i="${i/\/\//}"
+# This will also remove trailing comments
 fi
 
 
@@ -325,8 +333,9 @@ zoneContent=`cat $zoneDir'/'$1`
 
 
 	    # If the $currentRecord is a TTL, GENERATE, or some other junk, get rid of it
+	    # We also get rid of wilcard records here, due to not being able to do a query on *.domain.ksu.edu
 
-            '$TTL'|'$GENERATE'*|'"'*|'4W'|'2h)')
+            '$TTL'|'$GENERATE'*|'"'*|'4W'|'2h)'|[*]*)
               echo "EXCLUDING: ""$currentRecord" > /dev/null;;
 
 
@@ -342,7 +351,15 @@ zoneContent=`cat $zoneDir'/'$1`
 	    # has been excluded which means we use the last know hostname
 
             'TXT'|'SPF'|'A'|'CNAME'|'DNAME'|'MX'|'NS'|'LOC'|'SRV'|'IN'|[0-9][0-9][0-9]*|'30'|'5m')
-	      printf "$lastFQDN","$recordType\n";;
+
+	      # Checking to make sure this is not a PTR record, if it is, we dump it for now as reverse is broke
+
+	      if [[ $currentZone == *'in-addr.arpa' ]] || [[ $currentZone == *'IN-ADDR.ARPA' ]]
+		then
+		echo '' > /dev/null
+		else
+	      	  printf "$lastFQDN","$recordType\n"
+	      fi;;
 
 	    '' )
 	      echo "THIS IS A BLANK RECORD, using ""$lastFQDN" > /dev/null;;
@@ -361,9 +378,9 @@ zoneContent=`cat $zoneDir'/'$1`
 	#
 	# For now, I have it dumping the $currentRecord if the $currentZone is "in-addr.arpa" until this is working
 
-	      if [[ $currentZone == *'in-addr.arpa'* ]]
+	      if [[ $currentZone == *'in-addr.arpa' ]]
   		then
-		echo '' >/dev/null
+		echo '' > /dev/null
 #  		modRecord="$currentRecord"'.'"$currentZone"
 #  		modRecord="${modRecord/.in-addr.arpa/}"
 #
@@ -371,9 +388,9 @@ zoneContent=`cat $zoneDir'/'$1`
 #  		IFS=. read w x y z <<<"$modRecord"
 #  		printf "$z"'.'"$y"'.'"$x"'.'"$w\n"
 #  		IFS=$OIFS
-	      elif [[ $currentZone == *'IN-ADDR.ARPA'* ]]
+	      elif [[ $currentZone == *'IN-ADDR.ARPA' ]]
   		then
-		echo '' >/dev/null
+		echo '' /dev/null
 #  		modRecord="$currentRecord"'.'"$currentZone"
 #  		modRecord="${modRecord/.IN-ADDR.ARPA/}"
 #
