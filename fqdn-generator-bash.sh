@@ -145,8 +145,7 @@ zoneContent=`cat $zoneDir'/'$1`
 
 	  if [[ $z != [0-9][0-9][0-9]* ]]
 	    then
-	    echo 'MATCH'
-	  elif [[ $z == *'TXT'* ]] || [[ $z == *'SPF'* ]] || [[ $z == *'MX'* ]] || [[ $z == *'NS'* ]] || [[ $z == *'SRV'* ]] || [[ $z == *'LOC'* ]]
+	  if [[ $z == *'TXT'* ]] || [[ $z == *'SPF'* ]] || [[ $z == *'MX'* ]] || [[ $z == *'NS'* ]] || [[ $z == *'SRV'* ]] || [[ $z == *'LOC'* ]]
 	    then
 	    
 	    case $z in
@@ -172,9 +171,11 @@ zoneContent=`cat $zoneDir'/'$1`
 	      *)
 		recordType="A";;
 	    esac
-#	  else 
-#	    recordType="A"
+	  else
+	    recordType="A"
 	  fi
+	  fi
+
 	  if [[ $z == *'\$'* ]]
 	    then
 	echo '$GENERATE FOUND'
