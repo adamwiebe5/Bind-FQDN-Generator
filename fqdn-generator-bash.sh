@@ -3,7 +3,11 @@
 # Usage: ./script.sh [named.conf filepath] [zonefile directory]
 # Example: ./script.sh ~/Desktop/named/named.conf ~/Desktop/named/zonefiles/
 #
-
+#	The above example will send the output to the screen
+# 	if you wish to keep the results, simply redirect it to a CSV file
+#
+# Example: ./script.sh ~/Desktop/named/named.conf ~/Desktop/named/zonefiles/ > ~/Desktop/fqdn-out.csv
+#
 
 # Setting Internal Field Separator so Bash recognizes multiple spaces/tabs
 IFS='%'
@@ -354,9 +358,12 @@ zoneContent=`cat $zoneDir'/'$1`
 	# This is an attempt at dealing with reverse records, it is mostly working except GENERATE directives
 	# mess it up (You end up with a reverse record such as 129.130.254.0-255
 	# some minor tweaking would fix this, again (Too lazy, and it isn't needed right now)
+	#
+	# For now, I have it dumping the $currentRecord if the $currentZone is "in-addr.arpa" until this is working
 
-#	      if [[ $currentZone == *'in-addr.arpa'* ]]
-#  		then
+	      if [[ $currentZone == *'in-addr.arpa'* ]]
+  		then
+		echo '' >/dev/null
 #  		modRecord="$currentRecord"'.'"$currentZone"
 #  		modRecord="${modRecord/.in-addr.arpa/}"
 #
@@ -364,8 +371,9 @@ zoneContent=`cat $zoneDir'/'$1`
 #  		IFS=. read w x y z <<<"$modRecord"
 #  		printf "$z"'.'"$y"'.'"$x"'.'"$w\n"
 #  		IFS=$OIFS
-#	      elif [[ $currentZone == *'IN-ADDR.ARPA'* ]]
-#  		then
+	      elif [[ $currentZone == *'IN-ADDR.ARPA'* ]]
+  		then
+		echo '' >/dev/null
 #  		modRecord="$currentRecord"'.'"$currentZone"
 #  		modRecord="${modRecord/.IN-ADDR.ARPA/}"
 #
@@ -373,9 +381,9 @@ zoneContent=`cat $zoneDir'/'$1`
 #  		IFS=. read w x y z <<<"$modRecord"
 #  		printf "$z"'.'"$y"'.'"$x"'.'"$w\n"
 #  		IFS=$OIFS
-#	      else
- 		printf "$currentRecord"'.'"$currentZone","$recordType\n";;
-#	      fi;;
+	      else
+ 		printf "$currentRecord"'.'"$currentZone","$recordType\n"
+	      fi;;
 
 	  esac
 
