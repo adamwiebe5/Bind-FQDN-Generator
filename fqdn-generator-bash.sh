@@ -224,6 +224,7 @@ zoneContent=`cat $zoneDir'/'$1`
 	if [[ $z == *[0-9]*')'* ]]
 	  then
 	  soaRecord=false
+	  continue
 	fi
 
 
@@ -242,11 +243,9 @@ zoneContent=`cat $zoneDir'/'$1`
 
 	  if [[ $z == '$INCLUDE'* ]]
 	    then
-	    #echo '$INCLUDE'" found! Using zone directory: ""$zoneDir"
 	    zoneFile=`awk '{print $2}' <<< "$z"`
 	    currentZone=`awk '{print $3}' <<< "$z"`
 	    currentZone=${currentZone%.*}
-	    #echo ${currentZone%.*}
 	    processZone $zoneFile
 	  fi
 
@@ -347,7 +346,6 @@ zoneContent=`cat $zoneDir'/'$1`
 	      lastFQDN="$currentZone"
 	      printf "$currentZone","$recordType\n";;
 
-
 	    # If the $currentRecord is a record type or a TTL value, that means a hostname
 	    # has been excluded which means we use the last know hostname
 
@@ -371,7 +369,6 @@ zoneContent=`cat $zoneDir'/'$1`
 
 	    *)
 	      lastFQDN="$currentRecord"'.'"$currentZone"
-
 
 	# This is an attempt at dealing with reverse records, it is mostly working except GENERATE directives
 	# mess it up (You end up with a reverse record such as 129.130.254.0-255
