@@ -221,7 +221,7 @@ zoneContent=`cat $zoneDir'/'$1`
 
 	# A number followed by a closing parenthesis would indicate the end of the SOA
 
-	if [[ $z == *[0-9][0-9][0-9][0-9]*')'* ]]
+	if [[ $z == *[0-9]*')'* ]]
 	  then
 	  soaRecord=false
 	fi
