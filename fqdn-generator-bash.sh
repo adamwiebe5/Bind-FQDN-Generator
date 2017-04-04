@@ -39,6 +39,8 @@ while read i; do
 # Checking if the current line contains a comment so we can remove it, we 
 # check if a # exists FIRST before attempting to remove a comment that may not exist
 # as the attempt to remove a non-existent comment is very taxing
+if [[ $i != '#'* ]]
+  then
 
 if [[ $i == *'#'* ]]
   then
@@ -123,6 +125,7 @@ fi
   elif [[ $i != '' ]]
     then
     echo "$i" >> /tmp/fqdn-generator.tmp
+  fi
   fi
 done <<< "$config"
 
@@ -349,7 +352,7 @@ zoneContent=`cat $zoneDir'/'$1`
 	    # If the $currentRecord is a record type or a TTL value, that means a hostname
 	    # has been excluded which means we use the last know hostname
 
-            'TXT'|'SPF'|'A'|'CNAME'|'DNAME'|'MX'|'NS'|'LOC'|'SRV'|'IN'|[0-9][0-9][0-9]*|'30'|'5m')
+            'TXT'|'SPF'|'A'|'CNAME'|'DNAME'|'MX'|'NS'|'LOC'|'SRV'|'IN'|'30'|'5m')
 
 	      # Checking to make sure this is not a PTR record, if it is, we dump it for now as reverse is broke
 
@@ -358,6 +361,15 @@ zoneContent=`cat $zoneDir'/'$1`
 		echo '' > /dev/null
 		else
 	      	  printf "$lastFQDN","$recordType\n"
+	      fi;;
+
+	    [0-9]*)
+
+	      if [[ $currentRecord == *[a-z]* ]] || [[ $currentRecord == *[A-Z]* ]] || [[ $currentRecord == *-* ]]
+		then
+		printf "$currentRecord"'.'"$currentZone","$recordType\n"
+		else
+		echo '' > /dev/null
 	      fi;;
 
 	    '' )
@@ -424,4 +436,4 @@ createNamed
 processNamed
 
 # Cleanup temp files
-rm /tmp/fqdn-generator.tmp
+#rm /tmp/fqdn-generator.tmp
